@@ -1,0 +1,35 @@
+name: tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pesa
+          POSTGRES_PASSWORD: pesa
+          POSTGRES_DB: pesa
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pesa"
+          --health-interval 2s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql+psycopg://pesa:pesa@localhost:5432/pesa
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Unit tests
+        run: pytest -q
+      - name: Stress test against a live server
+        run: |
+          uvicorn app.main:app --port 8000 &
+          sleep 5
+          python scripts/stress_test.py

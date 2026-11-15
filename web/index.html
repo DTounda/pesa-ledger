@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pesa Wallet</title>
+  <meta name="description" content="A mobile-money wallet built on the Pesa Ledger API.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">P</span>
+      <span class="brand-name">Pesa</span>
+    </div>
+    <div class="topbar-right">
+      <button id="books-badge" class="books-badge is-checking" type="button"
+              title="Live check of GET /reconciliation">
+        <span class="dot" aria-hidden="true"></span>
+        <span id="books-text">Checking books…</span>
+      </button>
+      <div class="switcher" id="switcher" hidden>
+        <button id="switcher-btn" class="switcher-btn" type="button"
+                aria-haspopup="menu" aria-expanded="false">
+          <span class="avatar" id="me-avatar"></span>
+          <span class="switcher-name" id="me-name"></span>
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <div class="menu" id="switcher-menu" role="menu" hidden></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Shown when there are no wallets yet -->
+    <section id="welcome" class="welcome" hidden>
+      <div class="welcome-card">
+        <span class="brand-mark big" aria-hidden="true">P</span>
+        <h1>Mobile money that never loses a franc.</h1>
+        <p>Every payment is recorded twice, retries never pay twice, and the books
+           are checked live. Create a wallet to get started.</p>
+        <div class="welcome-actions">
+          <button class="btn btn-primary" data-open="create">Create a wallet</button>
+          <button class="btn btn-ghost" id="demo-btn">Load demo wallets</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- The wallet dashboard -->
+    <section id="dashboard" class="dashboard" hidden>
+      <div class="col">
+        <article class="balance-card">
+          <div class="balance-top">
+            <span class="balance-label">Available balance</span>
+            <button id="eye-btn" class="eye-btn" type="button" aria-label="Hide balance">
+              <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+            </button>
+          </div>
+          <div class="balance" id="balance">—</div>
+          <div class="balance-meta">
+            <span id="owner-line"></span>
+            <span class="chip" id="currency-chip"></span>
+          </div>
+        </article>
+
+        <div class="actions">
+          <button class="action" data-open="send">
+            <span class="action-icon send"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            Send
+          </button>
+          <button class="action" data-open="deposit">
+            <span class="action-icon deposit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+            Deposit
+          </button>
+          <button class="action" data-open="withdraw">
+            <span class="action-icon withdraw"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+            Withdraw
+          </button>
+        </div>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Send again</h2>
+          </div>
+          <div class="contacts" id="contacts"></div>
+        </article>
+
+        <article class="panel stats">
+          <div>
+            <span class="stat-label">Money in</span>
+            <span class="stat-value in" id="stat-in">—</span>
+          </div>
+          <div>
+            <span class="stat-label">Money out</span>
+            <span class="stat-value out" id="stat-out">—</span>
+          </div>
+          <div>
+            <span class="stat-label">Transactions</span>
+            <span class="stat-value" id="stat-count">—</span>
+          </div>
+        </article>
+      </div>
+
+      <div class="col">
+        <article class="panel activity">
+          <div class="panel-head">
+            <h2>Activity</h2>
+            <span class="muted small">Latest 50</span>
+          </div>
+          <ul class="tx-list" id="tx-list"></ul>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Built on the Pesa Ledger API ·
+    <a href="/docs">API docs</a> ·
+    <a href="/reconciliation" target="_blank" rel="noopener">Reconciliation report</a>
+  </footer>
+
+  <!-- One dialog, reused for every action -->
+  <dialog id="sheet" class="sheet">
+    <form id="sheet-form" class="sheet-body" novalidate>
+      <div class="sheet-head">
+        <h3 id="sheet-title"></h3>
+        <button type="button" class="icon-btn" data-close aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div id="sheet-fields"></div>
+      <p class="form-error" id="sheet-error" role="alert" hidden></p>
+      <button class="btn btn-primary btn-block" id="sheet-submit" type="submit"></button>
+      <p class="key-note" id="key-note" hidden></p>
+    </form>
+
+    <div class="sheet-body success" id="sheet-success" hidden>
+      <div class="check" aria-hidden="true">
+        <svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none"/><path d="M15 27l7 7 15-15" fill="none"/></svg>
+      </div>
+      <h3 id="success-title"></h3>
+      <p class="muted" id="success-sub"></p>
+      <div class="receipt" id="receipt"></div>
+      <button class="btn btn-primary btn-block" data-close type="button">Done</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

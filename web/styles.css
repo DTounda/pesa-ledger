@@ -437,6 +437,31 @@ main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 16px 
 .receipt span:first-child { color: var(--muted); }
 .receipt span:last-child { font-weight: 600; text-align: right; overflow-wrap: anywhere; }
 
+/* ---------- Demo banner ---------- */
+.demo-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 14px;
+  padding: 10px 16px;
+  background: var(--green-dark);
+  color: #e8f3ee;
+  font-size: 13px;
+  text-align: center;
+}
+.demo-banner[hidden] { display: none; }
+.demo-banner a { color: var(--lime); }
+.demo-banner button {
+  padding: 4px 12px;
+  border: 1px solid rgba(255, 255, 255, .3);
+  border-radius: 999px;
+  background: none;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 /* ---------- Toast & footer ---------- */
 .toast {
   position: fixed;

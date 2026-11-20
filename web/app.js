@@ -59,7 +59,35 @@ const ICONS = {
 };
 
 // ---------- API ----------
+// Two modes, chosen automatically:
+// - Live: the Python server is running (uvicorn), so we call the real API.
+// - Demo: the site is hosted on its own (e.g. Netlify), so the same rules run
+//   in this browser via demo-api.js, with fake money saved locally.
+let demoMode = null;
+
+async function detectMode() {
+  if (demoMode !== null) return demoMode;
+  try {
+    const response = await fetch("/health", { cache: "no-store" });
+    const data = await response.json();
+    demoMode = data.status !== "ok";
+  } catch {
+    demoMode = true; // no API answered (e.g. a static host returns a 404 page)
+  }
+  if (demoMode) {
+    $("demo-banner").hidden = false;
+    $("footer-live").hidden = true;
+    $("footer-demo").hidden = false;
+  }
+  return demoMode;
+}
+
 async function api(path, { method = "GET", body, key } = {}) {
+  if (await detectMode()) {
+    const result = window.PesaDemoApi.request(method, path, body, key);
+    if (!result.ok) throw new Error(result.data.error);
+    return { data: result.data, replayed: result.replayed };
+  }
   const headers = {};
   if (body) headers["Content-Type"] = "application/json";
   if (key) headers["Idempotency-Key"] = key;
@@ -404,6 +432,14 @@ $("eye-btn").addEventListener("click", () => {
 });
 
 $("books-badge").addEventListener("click", checkBooks);
+
+$("demo-reset").addEventListener("click", async () => {
+  if (!confirm("Delete all demo wallets in this browser and start fresh?")) return;
+  window.PesaDemoApi.reset();
+  try { localStorage.removeItem("pesa.me"); } catch {}
+  await refresh();
+  toast("Demo reset. Click \"Load demo wallets\" to try it again.");
+});
 
 // Demo data: three wallets and a few payments, created through the real API.
 $("demo-btn").addEventListener("click", async () => {

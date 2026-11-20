@@ -1,0 +1,4 @@
+# Netlify hosts the wallet as a static site. With no Python server there,
+# the app switches to demo mode automatically (see web/demo-api.js).
+[build]
+  publish = "web"

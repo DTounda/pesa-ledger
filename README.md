@@ -8,6 +8,12 @@
 **A mobile-money wallet back-end, like a small M-Pesa or MoMo, where money can
 never be lost, duplicated or spent twice. And it can prove it.**
 
+### 🌐 [Try the live demo → pesa-ledger.netlify.app](https://pesa-ledger.netlify.app/)
+
+> Click **Load demo wallets**, then send, deposit and withdraw. The live demo runs
+> the same ledger rules in your browser with fake money, so it's always instant.
+> The full Python API, tests and PostgreSQL setup are in this repo.
+
 <p align="center">
   <img src="docs/wallet-desktop.png" alt="Pesa Wallet dashboard: balance card, quick actions, contacts and activity feed" width="72%">
   <img src="docs/wallet-mobile-send.png" alt="Send money screen on a phone, protected by an idempotency key" width="24%">
@@ -34,7 +40,11 @@ runs on top of the API at **http://localhost:8000**:
 - A live **"Books balanced"** badge that calls `/reconciliation`
 - Receipts show the transaction's two **ledger entries**
 - **Load demo wallets** button to try it in one click
+- **Two modes, chosen automatically:** with the Python server running, the app uses
+  the real API; on a static host like Netlify, `web/demo-api.js` runs the same
+  double-entry and idempotency rules in the browser
 
+  
 ## ✅ Proven under load
 
 `scripts/stress_test.py` runs against a live server on PostgreSQL, and runs
